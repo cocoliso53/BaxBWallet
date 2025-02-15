@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react'
 import { getAlchemyClient } from '../config/alchemy'
 import { AssetTransfersWithMetadataResult, AssetTransfersCategory } from 'alchemy-sdk'
 
+// TODO: Might need modify this based on
+// the selected chain, keeping external,
+// ERC20 and ERC721 for testing purposes atm
 const CATEGORIES = [
     AssetTransfersCategory.EXTERNAL,
-    AssetTransfersCategory.INTERNAL,
     AssetTransfersCategory.ERC20,
-    AssetTransfersCategory.ERC721,
-    AssetTransfersCategory.ERC1155
-  ] as const
+    AssetTransfersCategory.ERC721
+  ]
 
 // TODO: Need to come up with a better way
 // searching since genesis block might work
@@ -47,13 +48,7 @@ export const TransactionHistory = () => {
         const sent = await alchemy.core.getAssetTransfers({
           fromBlock: "0x0",
           fromAddress: address,
-          category: [
-            AssetTransfersCategory.EXTERNAL,
-            AssetTransfersCategory.INTERNAL,
-            AssetTransfersCategory.ERC20,
-            AssetTransfersCategory.ERC721,
-            AssetTransfersCategory.ERC1155
-          ],
+          category: CATEGORIES,
           withMetadata: true,
           maxCount: 5
         })
@@ -62,13 +57,7 @@ export const TransactionHistory = () => {
         const received = await alchemy.core.getAssetTransfers({
           fromBlock: "0x0",
           toAddress: address,
-          category: [
-            AssetTransfersCategory.EXTERNAL,
-            AssetTransfersCategory.INTERNAL,
-            AssetTransfersCategory.ERC20,
-            AssetTransfersCategory.ERC721,
-            AssetTransfersCategory.ERC1155
-          ],
+          category: CATEGORIES,
           withMetadata: true,
           maxCount: 5
         })
