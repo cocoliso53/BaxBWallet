@@ -8,8 +8,7 @@ const chainToExplorerUrl: { [chainId: number]: string } = {
   80002: "https://amoy.polygonscan.com/address/{address}",
 }
 
-function getExplorerUrl(walletAddress: string): string {
-  const chainId = useChainId()
+function getExplorerUrl(chainId: number, walletAddress: string): string {
   const urlTemplate = chainToExplorerUrl[chainId];
   return urlTemplate ? urlTemplate.replace("{address}", walletAddress) : "";
 }
@@ -20,8 +19,9 @@ export const WalletBalance = () => {
     const { data: balance } = useBalance({
       address,
     })
+    const chainId = useChainId()
 
-    const walletURL = getExplorerUrl(address as string)
+    const walletURL = getExplorerUrl(chainId, address as string)
   
     // Prevent hydration errors by only rendering after mount
     useEffect(() => {

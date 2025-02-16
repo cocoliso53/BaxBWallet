@@ -1,16 +1,44 @@
 import { useEffect, useState, useRef } from 'react'
 import { createCowSwapWidget, CowSwapWidgetParams, TradeType } from '@cowprotocol/widget-lib'
+import { useWalletClient } from 'wagmi'
+
+// Helper function that adapts the wallet client to an EIP‑1193 
+// required by cowswap, it works but double check before using in prod
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createEthereumProvider(walletClient: any) {
+    return {
+      on(event: string, listener: (args: unknown) => void): void {
+        if (typeof walletClient.on === 'function') {
+          walletClient.on(event, listener)
+        }
+      },
+      async request<T>(params: { id: number; method: string; params: unknown[] }): Promise<T> {
+        return walletClient.request(params)
+      },
+      async enable(): Promise<void> {
+        await walletClient.request({
+          id: Date.now(),
+          method: 'eth_requestAccounts',
+          params: []
+        })
+      }
+    }
+  }
 
 export const SwapWidget = () => {
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const { data: walletClient } = useWalletClient()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
   useEffect(() => {
-    if (containerRef.current && mounted && window.ethereum) {
+    if (containerRef.current && mounted && walletClient) {
+
+      const provider = createEthereumProvider(walletClient)
+
       const params: CowSwapWidgetParams = {
         appCode: "BaxB-Wallet",
         width: "100%",
@@ -21,13 +49,13 @@ export const SwapWidget = () => {
           "https://files.cow.fi/tokens/CowSwap.json"
         ],
         tradeType: TradeType.SWAP,
-        standaloneMode: true, // could we use the already existing wallet connection? 
+        standaloneMode: false,
         theme: "light",
       }
 
       createCowSwapWidget(containerRef.current, { 
         params, 
-        provider: window.ethereum 
+        provider 
       })
     }
   }, [mounted])

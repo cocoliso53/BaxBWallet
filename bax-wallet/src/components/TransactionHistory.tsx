@@ -22,8 +22,7 @@ const CATEGORIES = [
     80002: "https://amoy.polygonscan.com/tx/{hash}",
   }
   
-  function getTxUrl(txHash: string): string {
-    const chainId = useChainId()
+  function getTxUrl(chainId: number, txHash: string): string {
     const urlTemplate = chainToExplorerUrl[chainId];
     return urlTemplate ? urlTemplate.replace("{hash}", txHash) : "";
   }
@@ -82,7 +81,7 @@ export const TransactionHistory = () => {
     <div className="bg-white rounded-lg shadow p-4 mb-4">
       <div className="flex justify-between items-center mb-2">
         <span className="font-mono text-sm">
-          <a href={getTxUrl(tx.hash)} target="_blank" rel="noopener noreferrer">
+          <a href={getTxUrl(chainId,tx.hash)} target="_blank" rel="noopener noreferrer">
           {tx.hash?.slice(0, 10)}...
           </a>
         </span>
@@ -107,7 +106,7 @@ export const TransactionHistory = () => {
     <div className="bg-white rounded-lg shadow p-4 mb-4">
       <div className="flex justify-between items-center mb-2">
         <span className="font-mono text-sm">
-        <a href={getTxUrl(tx.hash)} target="_blank" rel="noopener noreferrer">
+        <a href={getTxUrl(chainId,tx.hash)} target="_blank" rel="noopener noreferrer">
           {tx.hash?.slice(0, 10)}...
         </a>
         </span>
