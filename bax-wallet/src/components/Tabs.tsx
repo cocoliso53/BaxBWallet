@@ -27,7 +27,7 @@ export const TabContent = () => {
               ? 'border-b-2 border-blue-500 text-blue-500'
               : 'text-gray-500'
           }`}
-          onClick={() => setActiveTab('transactions')}
+          onClick={() => setActiveTab('dispersions')}
         >
           Dispersions
         </button>
