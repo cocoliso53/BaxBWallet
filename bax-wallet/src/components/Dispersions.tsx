@@ -60,17 +60,25 @@ export const BatchTransfer = () => {
   }
 
   const approveToken = async (tokenAddr: string, totalAmount: string) => {
-    console.log("about to get signer")
-    const signer = await getSigner()
-    console.log("got it")
-    const token = new ethers.Contract(
-      tokenAddr,
-      ["function approve(address spender, uint256 amount) public returns (bool)"],
-      signer
-    )
-    const tx = await token.approve(BATCH_TRANSFER_ADDRESS, totalAmount)
-    await tx.wait()
-  }
+    try {
+        const signer = await getSigner()
+        const token = new ethers.Contract(
+        tokenAddr,
+        ["function approve(address spender, uint256 amount) public returns (bool)"],
+        signer
+        )
+        const tx = await token.approve(BATCH_TRANSFER_ADDRESS, totalAmount)
+        await tx.wait()
+    } catch (error: any) {
+        if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
+            console.log('User rejected the transaction.')
+        } else {
+            console.error('Transfer failed:', error)
+        }
+    } finally {
+        setIsLoading(false)
+    }
+}
 
   const handleTransfer = async () => {
     try {
@@ -80,8 +88,6 @@ export const BatchTransfer = () => {
         // Also needs some work, decimal places will vary form
         // token to token and from chain to chain
 
-        console.log("we are here")
-
         const parsedAmounts = amounts.map(amt =>
             ethers.parseUnits(amt.trim(), 18).toString()
           )
@@ -90,11 +96,10 @@ export const BatchTransfer = () => {
           .map(BigInt)
           .reduce((acc, cur) => acc + cur, BigInt(0))
           .toString()
-        
-        console.log(parsedAmounts);
 
         await approveToken(tokenAddress, totalAmount)
 
+        // This would also need to be inside a try-catch block
         await writeContract(config, {
           address: BATCH_TRANSFER_ADDRESS,
           abi: BATCH_TRANSFER_ABI,
